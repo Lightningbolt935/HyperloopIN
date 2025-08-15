@@ -1,0 +1,2167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SRM Club Hyperloopin - Next Generation Transportation</title>
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&family=Montserrat:wght@700&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Raleway', sans-serif;
+      line-height: 1.6;
+      color: #fff;
+      background: radial-gradient(ellipse at 50% 0%, rgba(46,204,113,0.22) 0%, transparent 60%), 
+                  radial-gradient(ellipse at 50% 100%, rgba(74,144,226,0.18) 0%, transparent 70%), 
+                  linear-gradient(135deg, #0a0a0a 0%, #151515 50%, #1a1a1a 100%);
+      overflow-x: hidden;
+      cursor: none;
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      padding: 1rem 2rem;
+      background: transparent !important;
+      backdrop-filter: none !important;
+      border-bottom: none !important;
+      box-shadow: none !important;
+      z-index: 1000;
+      transition: background 0.4s, transform 0.4s cubic-bezier(0.4,0,0.2,1);
+    }
+    nav.hide {
+      transform: translateY(-100%);
+      transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+    }
+    .nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .logo {
+      height: 50px;
+      transition: all 0.3s ease;
+      filter: brightness(1.1);
+      display: flex;
+      align-items: center;
+    }
+    .logo:hover {
+      transform: scale(1.05);
+      filter: brightness(1.2) drop-shadow(0 0 20px rgba(74, 144, 226, 0.3));
+    }
+    .logo img {
+      height: 400%;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 24px rgba(0,0,0,0.55));
+    }
+    .logo-text {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(45deg, #4A90E2, #2ECC71);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 1px;
+    }
+    .nav-links {
+      display: flex;
+      list-style: none;
+      gap: 2rem;
+    }
+    .nav-links a {
+      color: #fff;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border-radius: 25px;
+      position: relative;
+      overflow: hidden;
+      font-weight: 600;
+      font-family: 'Montserrat', sans-serif;
+      transition: color 0.3s;
+    }
+    .nav-links a::after {
+      content: "";
+      display: block;
+      width: 0;
+      height: 2.5px;
+      background: linear-gradient(90deg, #2ECC71 0%, #4A90E2 100%);
+      border-radius: 2px;
+      transition: width 0.3s;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      margin: 0 auto;
+    }
+    .nav-links a:hover {
+      color: #4A90E2;
+    }
+    .nav-links a:hover::after {
+      width: 75%;
+    }
+
+    .page-section {
+      min-height: 100vh;
+      padding: 5rem 5vw 2rem 5vw; 
+      padding-top: 80px; 
+      max-width: 1400px; 
+      margin: 0 auto;
+      display: none; 
+      transition: opacity 0.5s, padding-top 0.4s; 
+      opacity: 0; 
+      pointer-events: none;
+    }
+    nav.hide ~ .page-section { 
+      padding-top: 20px; 
+    }
+    .page-section.active { 
+      display: block; 
+      opacity: 1; 
+      pointer-events: auto;
+    }
+    @media (max-width: 800px) {
+      .page-section { 
+        padding: 4rem 1rem 1rem 1rem; 
+        padding-top: 80px; 
+      }
+    }
+
+    /* Team Page Styles - Fullscreen overlay */
+    #teamPage {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: radial-gradient(ellipse at 50% 0%, rgba(46,204,113,0.22) 0%, transparent 60%), 
+                  radial-gradient(ellipse at 50% 100%, rgba(74,144,226,0.18) 0%, transparent 70%), 
+                  linear-gradient(135deg, #0a0a0a 0%, #151515 50%, #1a1a1a 100%);
+      z-index: 2000;
+      overflow: hidden;
+      touch-action: none;
+      user-select: none;
+    }
+
+    #teamPage.active {
+      display: block;
+      animation: pageLoad 0.8s ease-out both;
+    }
+
+    .team-intro-screen, .team-main-section {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      will-change: transform, opacity;
+      outline: none;
+    }
+
+    .team-intro-screen {
+      z-index: 10;
+      text-align: center;
+      transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      position: relative;
+      overflow: hidden;
+      padding: 5vw;
+    }
+
+    /* Animated background particles */
+    .team-intro-screen::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 20% 80%, rgba(74, 144, 226, 0.15) 0%, transparent 50%), 
+                  radial-gradient(circle at 80% 20%, rgba(46, 204, 113, 0.12) 0%, transparent 50%), 
+                  radial-gradient(circle at 40% 40%, rgba(74, 144, 226, 0.1) 0%, transparent 50%);
+      animation: backgroundFloat 20s ease-in-out infinite;
+      z-index: -1;
+    }
+
+    @keyframes backgroundFloat {
+      0%, 100% { transform: translateX(0%) translateY(0%) scale(1); }
+      33% { transform: translateX(-20px) translateY(-20px) scale(1.1); }
+      66% { transform: translateX(20px) translateY(20px) scale(0.9); }
+    }
+
+    .team-intro-screen.dragging {
+      backdrop-filter: blur(12px) saturate(1.5);
+      transition: backdrop-filter 0.3s ease;
+    }
+
+    .team-main-title {
+      font-size: clamp(3rem, 8vw, 6rem);
+      letter-spacing: 8px;
+      font-weight: 700;
+      background: linear-gradient(45deg, #ffffff, #4A90E2, #2ECC71);
+      background-size: 200% 200%;
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 3s ease-in-out infinite, titlePulse 2s ease-in-out infinite;
+      transform: translateY(0);
+      transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    @keyframes shimmer {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    @keyframes titlePulse {
+      0%, 100% { 
+        transform: scale(1) translateY(0); 
+        text-shadow: 0 0 20px rgba(74, 144, 226, 0.3); 
+      }
+      50% { 
+        transform: scale(1.02) translateY(-2px); 
+        text-shadow: 0 0 30px rgba(74, 144, 226, 0.5); 
+      }
+    }
+
+    .team-sub-title {
+      font-size: clamp(1.5rem, 4vw, 2.2rem);
+      margin-top: 20px;
+      opacity: 0.9;
+      animation: fadeInUp 1s ease-out 0.5s both, subtitleFloat 4s ease-in-out infinite 2s;
+      position: relative;
+      font-family: 'Montserrat', sans-serif;
+      background: linear-gradient(45deg, #ffffff, #4A90E2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    @keyframes subtitleFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .team-scroll-indicator {
+      margin-top: 40px;
+      font-size: 1.2rem;
+      opacity: 0.6;
+      animation: bounceGlow 2s infinite ease-in-out, indicatorPulse 3s infinite ease-in-out;
+      position: relative;
+      padding: 15px 25px;
+      border: 2px solid rgba(74, 144, 226, 0.3);
+      border-radius: 25px;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      font-family: 'Raleway', sans-serif;
+    }
+
+    .team-scroll-indicator::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, #4A90E2, #2ECC71, #4A90E2);
+      border-radius: 25px;
+      z-index: -1;
+      opacity: 0;
+      animation: borderGlow 3s ease-in-out infinite;
+    }
+
+    @keyframes borderGlow {
+      0%, 100% { opacity: 0; }
+      50% { opacity: 0.7; }
+    }
+
+    @keyframes bounceGlow {
+      0%, 100% { 
+        transform: translateY(0); 
+        box-shadow: 0 5px 15px rgba(74, 144, 226, 0.2); 
+      }
+      50% { 
+        transform: translateY(-8px); 
+        box-shadow: 0 10px 25px rgba(74, 144, 226, 0.4); 
+      }
+    }
+
+    @keyframes indicatorPulse {
+      0%, 100% { border-color: rgba(74, 144, 226, 0.3); }
+      50% { border-color: rgba(46, 204, 113, 0.6); }
+    }
+
+    .team-main-section {
+      z-index: 5;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      justify-content: flex-start;
+      align-items: stretch;
+      padding: 0;
+      overflow-y: auto;
+    }
+
+    .team-container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 120px 20px 40px 20px;
+      text-align: center;
+    }
+
+    .team-section-heading {
+      font-size: clamp(2rem, 6vw, 3rem);
+      margin-bottom: 30px;
+      text-transform: uppercase;
+      font-weight: 700;
+      background: linear-gradient(45deg, #ffffff, #4A90E2);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: sectionSlideIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+      position: relative;
+      margin-top: 0;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .team-section-heading::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #2ECC71, #4A90E2);
+      animation: underlineExpand 1s ease-out 0.5s both;
+    }
+
+    @keyframes sectionSlideIn {
+      from { opacity: 0; transform: translateY(-50px) scale(0.8); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes underlineExpand {
+      to { width: 100px; }
+    }
+
+    .team-category {
+      margin-bottom: 50px;
+      text-align: left;
+      animation: categorySlideIn 0.8s ease-out both;
+    }
+
+    @keyframes categorySlideIn {
+      from { opacity: 0; transform: translateX(-30px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .team-category h3 {
+      font-size: clamp(1.2rem, 3vw, 1.8rem);
+      margin-bottom: 20px;
+      border-left: 4px solid #2ECC71;
+      padding-left: 12px;
+      position: relative;
+      transition: all 0.3s ease;
+      font-family: 'Montserrat', sans-serif;
+      color: #4A90E2;
+    }
+
+    .team-category h3::before {
+      content: '';
+      position: absolute;
+      left: -4px;
+      top: 0;
+      bottom: 0;
+      width: 0;
+      background: linear-gradient(45deg, #4A90E2, #2ECC71);
+      transition: width 0.5s ease;
+    }
+
+    .team-category:hover h3::before {
+      width: 4px;
+    }
+
+    .card-grid {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: stretch;
+    }
+
+    .member-card {
+      background: rgba(28,28,38,0.38);
+      border: 1.5px solid rgba(74,144,226,0.10);
+      backdrop-filter: blur(16px) saturate(160%);
+      box-shadow: 0 8px 32px rgba(74,144,226,0.06);
+      border-radius: 28px;
+      padding: 20px;
+      text-align: center;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      animation: cardSlideUp 0.6s ease-out both;
+      flex: 0 0 auto;
+      min-width: 180px;
+      max-width: 220px;
+      width: 200px;
+      will-change: transform, opacity, box-shadow;
+    }
+
+    .member-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(74, 144, 226, 0.1), transparent);
+      transition: left 0.6s ease;
+    }
+
+    .member-card:hover::before {
+      left: 100%;
+    }
+
+    @keyframes cardSlideUp {
+      from { opacity: 0; transform: translateY(30px) scale(0.9); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .member-card:hover {
+      background: rgba(40,50,70,0.52);
+      border-color: rgba(46,204,113,0.26);
+      box-shadow: 0 15px 40px rgba(46,204,113,0.22);
+      transform: scale(1.03) translateY(-6px);
+    }
+
+    .member-card img {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 50%;
+      margin-bottom: 15px;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      border: 3px solid rgba(74, 144, 226, 0.2);
+      animation: imageFloat 3s ease-in-out infinite;
+    }
+
+    @keyframes imageFloat {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-5px) rotate(1deg); }
+    }
+
+    .member-card:hover img {
+      transform: scale(1.1) rotate(5deg);
+      border-color: #2ECC71;
+      box-shadow: 0 10px 30px rgba(46, 204, 113, 0.3);
+    }
+
+    .member-card h4 {
+      font-size: 1.1rem;
+      margin: 0;
+      transition: all 0.3s ease;
+      position: relative;
+      font-family: 'Montserrat', sans-serif;
+      color: #4A90E2;
+    }
+
+    .member-card:hover h4 {
+      color: #2ECC71;
+      transform: translateY(-2px);
+    }
+
+    .member-card p {
+      font-size: 0.9rem;
+      margin: 0;
+      opacity: 0.8;
+      transition: all 0.3s ease;
+    }
+
+    .member-card:hover p {
+      opacity: 1;
+      color: #4A90E2;
+    }
+
+    /* Custom Scrollbar */
+    .team-main-section::-webkit-scrollbar {
+      width: 12px;
+    }
+
+    .team-main-section::-webkit-scrollbar-thumb {
+      background: linear-gradient(45deg, rgba(74, 144, 226, 0.6), rgba(46, 204, 113, 0.6));
+      border-radius: 10px;
+      border: 2px solid transparent;
+      background-clip: content-box;
+      transition: all 0.3s ease;
+    }
+
+    .team-main-section::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(45deg, rgba(74, 144, 226, 0.8), rgba(46, 204, 113, 0.8));
+      transform: scale(1.1);
+    }
+
+    .team-main-section::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+    }
+
+    /* Close button for team page */
+    .team-close-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      background: rgba(28,28,38,0.8);
+      border: 2px solid rgba(74,144,226,0.3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 24px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      z-index: 2001;
+      backdrop-filter: blur(10px);
+    }
+
+    .team-close-btn:hover {
+      background: rgba(74,144,226,0.2);
+      border-color: rgba(74,144,226,0.5);
+      transform: scale(1.1);
+    }
+
+    /* Team page mobile responsiveness */
+    @media (max-width: 768px) {
+      .team-container {
+        padding: 100px 10px 20px 10px;
+      }
+      .team-section-heading {
+        margin-bottom: 20px;
+        font-size: 2rem;
+      }
+      .team-category {
+        margin-bottom: 30px;
+      }
+      .card-grid {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        justify-content: flex-start;
+        padding: 0 10px;
+        scroll-snap-type: x mandatory;
+      }
+      .member-card {
+        scroll-snap-align: start;
+        flex-shrink: 0;
+      }
+      .card-grid::-webkit-scrollbar {
+        height: 6px;
+      }
+      .card-grid::-webkit-scrollbar-thumb {
+        background: rgba(74, 144, 226, 0.5);
+        border-radius: 3px;
+      }
+      .nav-links {
+        display: none;
+      }
+    }
+
+    /* Rest of existing styles remain the same */
+    .hero {
+      height: 100vh; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      text-align: center; 
+      position: relative; 
+      background: none; 
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .hero-content {
+      max-width: 800px; 
+      margin: 0 auto; 
+      padding-left: 2vw; 
+      padding-right: 2vw;
+      z-index: 2; 
+      animation: fadeInUp 1s ease-out;
+      transform-origin: center top; 
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .hero.morphed { 
+      transform: translateY(-30vh);
+    }
+    .hero.morphed .hero-content { 
+      transform: scale(0.7);
+    }
+    .hero.morphed .hero-description, .hero.morphed .cta-button { 
+      opacity: 0; 
+      transform: translateY(20px);
+    }
+    .hero.morphed .recruitment-banner { 
+      opacity: 0; 
+      transform: translateY(-20px);
+    }
+
+    .recruitment-banner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      margin: 0 auto 3rem auto;
+      padding: 1rem 2rem;
+      max-width: 600px;
+      width: fit-content;
+      background: rgba(46, 204, 113, 0.1);
+      border: 2px solid rgba(46, 204, 113, 0.3);
+      border-radius: 50px;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      animation: recruitmentPulse 3s ease-in-out infinite;
+      position: relative;
+      z-index: 10;
+      margin-top: 2rem;
+    }
+
+    .recruitment-banner:hover {
+      background: rgba(46, 204, 113, 0.15);
+      border-color: rgba(46, 204, 113, 0.5);
+      transform: scale(1.02);
+    }
+
+    .recruitment-text {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #2ECC71;
+      letter-spacing: 0.5px;
+      text-shadow: 0 2px 10px rgba(46, 204, 113, 0.3);
+      white-space: nowrap;
+      text-align: center;
+    }
+
+    .recruitment-button {
+      padding: 0.7rem 1.8rem;
+      background: linear-gradient(45deg, #2ECC71, #27AE60);
+      color: white;
+      text-decoration: none;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
+      border: none;
+      cursor: pointer;
+      white-space: nowrap;
+      text-align: center;
+    }
+
+    .recruitment-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(46, 204, 113, 0.6);
+      background: linear-gradient(45deg, #27AE60, #2ECC71);
+    }
+
+    @keyframes recruitmentPulse {
+      0%, 100% { 
+        box-shadow: 0 0 20px rgba(46, 204, 113, 0.3); 
+      }
+      50% { 
+        box-shadow: 0 0 30px rgba(46, 204, 113, 0.5); 
+      }
+    }
+
+    @media (max-width: 768px) {
+      .recruitment-banner { 
+        flex-direction: column; 
+        gap: 0.8rem; 
+        padding: 1.2rem 1rem;
+        margin: 2rem 1rem 2rem 1rem;
+        max-width: none;
+        width: calc(100% - 2rem);
+      }
+      
+      .recruitment-text { 
+        font-size: 1rem; 
+        text-align: center;
+        white-space: normal;
+      }
+      
+      .recruitment-button {
+        font-size: 0.9rem;
+        padding: 0.8rem 1.5rem;
+      }
+      
+      .hero-logo-bg { 
+        width: 320px; 
+        height: 320px; 
+        margin: 0 auto -60px auto; 
+      }
+      .hero-logo { 
+        width: 300px; 
+        height: 300px; 
+      }
+      .hero h1 { 
+        font-size: 2.5rem !important; 
+      }
+      .features-grid { 
+        grid-template-columns: 1fr !important; 
+        gap:2rem !important;
+      }
+      .feature-card { 
+        min-height: 0; 
+      }
+      .video-container h2 { 
+        font-size: 2.2rem; 
+      }
+      .media-hero h1 { 
+        font-size: 3rem !important; 
+      }
+      .media-hero { 
+        margin: 0 -1rem 0 -1rem; 
+        padding: 0 1rem; 
+        padding-top: 80px; 
+      }
+      .timeline { 
+        padding-left: 20px; 
+      }
+      .update-item { 
+        margin-left: 30px; 
+      }
+    }
+
+    @media (max-width: 480px) {
+      .recruitment-banner {
+        padding: 1rem 0.8rem;
+        margin: 1.5rem 0.5rem 2rem 0.5rem;
+        width: calc(100% - 1rem);
+      }
+      
+      .recruitment-text {
+        font-size: 0.95rem;
+      }
+    }
+
+    .hero-logo-bg {
+      display: flex; 
+      justify-content: center; 
+      align-items: center;
+      width: 520px; 
+      height: 520px; 
+      margin: 0 auto -150px auto; 
+      border-radius: 50%;
+      background: radial-gradient(ellipse at center, rgba(20,24,36,0.48) 42%, transparent 95%);
+      transition: filter 0.3s ease;
+    }
+    .hero-logo {
+      width: 500px; 
+      height: 500px; 
+      display: block; 
+      object-fit: contain; 
+      opacity: 0.93;
+      animation: logoFloat 4s ease-in-out infinite; 
+      transition: all 0.3s ease;
+      filter: drop-shadow(0 4px 36px rgba(0,0,0,0.65));
+    }
+    .hero-logo:hover { 
+      transform: scale(1.1); 
+      opacity: 1; 
+      filter: drop-shadow(0 8px 40px rgba(0, 0, 0, 0.8)); 
+    }
+    @keyframes logoFloat { 
+      0%,100%{ transform: translateY(0px);} 
+      50%{ transform:translateY(-10px); } 
+    }
+
+    h1, h2, h3, .logo-text { 
+      font-family: 'Montserrat', 'Raleway', sans-serif; 
+      letter-spacing: 1px;
+    }
+    .hero h1 {
+      font-size: 4rem !important; 
+      margin: 0 0 0.25rem 0 !important;
+      background: linear-gradient(45deg, #ffffff, #4A90E2) !important;
+      -webkit-background-clip: text !important; 
+      -webkit-text-fill-color: transparent !important;
+      background-clip: text !important; 
+      font-weight: 700 !important; 
+      position: relative !important; 
+      z-index: 10;
+      text-shadow: 0 8px 32px rgba(46,204,113,0.18), 0 2px 18px rgba(74,144,226,0.09);
+    }
+    .hero-subtitle { 
+      font-size: 1.5rem; 
+      margin-bottom: 2rem; 
+      opacity: 0.9; 
+      font-weight: 300;
+    }
+    .hero-description { 
+      font-size: 1.1rem; 
+      margin-bottom: 3rem; 
+      opacity: 0.8; 
+      line-height: 1.8; 
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    .cta-button {
+      display: inline-block; 
+      padding: 1rem 2.5rem;
+      background: linear-gradient(45deg, #4A90E2, #2ECC71); 
+      color: white;
+      text-decoration: none; 
+      border-radius: 42px; 
+      font-weight: 600; 
+      transition: all 0.3s;
+      box-shadow: 0 10px 30px rgba(74, 144, 226, 0.3); 
+      will-change: transform;
+    }
+    .cta-button:hover { 
+      transform: perspective(400px) rotateX(5deg) scale(1.045) translateY(-4px); 
+      box-shadow: 0 18px 36px rgba(74,144,226,0.15);
+    }
+    .particles { 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      overflow: hidden; 
+      z-index: 1;
+    }
+    .particle { 
+      position: absolute; 
+      width: 3px; 
+      height: 3px; 
+      border-radius: 50%; 
+      animation: float 6s ease-in-out infinite; 
+      opacity: 0.4;
+    }
+    .particle:nth-child(1) { 
+      background: #4A90E2; 
+      left: 20%; 
+      animation-delay:0s;
+    }
+    .particle:nth-child(2) { 
+      background: #2ECC71; 
+      left: 40%; 
+      animation-delay:1s;
+    }
+    .particle:nth-child(3) { 
+      background: #4A90E2; 
+      left: 60%; 
+      animation-delay:2s;
+    }
+    .particle:nth-child(4) { 
+      background: #2ECC71; 
+      left: 80%; 
+      animation-delay:3s;
+    }
+    .particle:nth-child(5) { 
+      background: #4A90E2; 
+      left: 30%; 
+      animation-delay:4s;
+    }
+    @keyframes float { 
+      0%,100%{ transform: translateY(0px);} 
+      50%{ transform:translateY(-20px);} 
+    }
+
+    .video-section {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5rem 5vw;
+      opacity: 0;
+      transform: translateY(80px) scale(0.95);
+      transition: opacity 0.8s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.8s cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+    .video-section.scroll-morphed {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    .video-container {
+      max-width: 1000px;
+      width: 100%;
+      text-align: center;
+    }
+    .video-container h2 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(45deg, #ffffff, #4A90E2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 3px 12px rgba(46,204,113,0.15);
+    }
+    .video-container .subtitle {
+      display: block;
+      text-align: center;
+      margin: 0 auto 3rem auto;
+      opacity: 0.8;
+      font-size: 1.2rem;
+      position: relative;
+    }
+    .video-container .subtitle::after {
+      content: "";
+      display: block;
+      width: 70px;
+      height: 4px;
+      margin: 12px auto 0 auto;
+      border-radius: 2px;
+      background: linear-gradient(90deg, #2ECC71, #4A90E2, #2ECC71);
+      animation: accentBar 2.7s infinite linear;
+    }
+    .video-wrapper {
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      background: rgba(28,28,38,0.5);
+      border: 2px solid rgba(74,144,226,0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .video-wrapper:hover {
+      transform: translateY(-10px) scale(1.02);
+      box-shadow: 0 30px 80px rgba(46,204,113,0.3);
+    }
+    .video-wrapper video {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    #homePage {
+      opacity: 0; 
+      transform: translateY(80px) scale(0.95);
+      transition: opacity 0.8s cubic-bezier(0.25,0.46,0.45,0.94), transform 0.8s cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+    #homePage.scroll-morphed { 
+      opacity: 1; 
+      transform: translateY(0) scale(1);
+    }
+    .page-section h2 {
+      font-size: 3rem;
+      text-align: center;
+      margin-bottom: 1rem;
+      background: linear-gradient(45deg, #ffffff, #4A90E2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 3px 12px rgba(46,204,113,0.15);
+    }
+    .page-section .subtitle {
+      display: block;
+      text-align: center;
+      margin-left: auto;
+      margin-right: auto;
+      margin-bottom: 1.5rem;
+      max-width: 100%;
+      opacity: 0.8; 
+      font-size: 1.2rem;
+      transition: opacity 0.5s;
+      position: relative;
+    }
+    .page-section .subtitle::after {
+      content: ""; 
+      display: block; 
+      width: 70px; 
+      height: 4px; 
+      margin: 12px auto 0 auto; 
+      border-radius: 2px;
+      background: linear-gradient(90deg, #2ECC71, #4A90E2, #2ECC71);
+      animation: accentBar 2.7s infinite linear;
+    }
+    @keyframes accentBar { 
+      from { background-position: 0 0; } 
+      to   { background-position: 140px 0; }
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 3rem;
+      margin-top: 3rem;
+      perspective: 1200px;
+      margin-left: auto; 
+      margin-right: auto; 
+      width: 100%;
+      justify-items: center;
+    }
+    .feature-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(28,28,38,0.38);
+      border: 1.5px solid rgba(74,144,226,0.10);
+      backdrop-filter: blur(16px) saturate(160%);
+      box-shadow: 0 8px 32px rgba(74,144,226,0.06);
+      border-radius: 28px;
+      padding: 2.5rem;
+      min-height: 320px;
+      margin: 0 auto;
+      opacity: 1;
+      transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+      will-change: transform, opacity, box-shadow;
+      text-align: center;
+    }
+    .features-grid .feature-card {
+      opacity: 0;
+      transform: translateY(80px) rotateX(25deg);
+      transition: all 0.8s cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+    .page-section.scroll-morphed .features-grid .feature-card {
+      opacity: 1;
+      transform: translateY(0) rotateX(0deg);
+    }
+    .features-grid:hover .feature-card:not(:hover) { 
+      transform: translateY(5px) scale(0.98); 
+      opacity: 0.7;
+    }
+    .feature-card:hover {
+      background: rgba(40,50,70,0.52);
+      border-color: rgba(46,204,113,0.26);
+      box-shadow: 0 15px 40px rgba(46,204,113,0.22);
+      transform: scale(1.03) translateY(-6px);
+    }
+    .feature-icon {
+      width: 60px; 
+      height: 60px;
+      background: linear-gradient(45deg, #4A90E2, #2ECC71);
+      border-radius: 15px;
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      margin-bottom: 1.5rem;
+      font-size: 1.5rem; 
+      color: white; 
+      text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      z-index: 1;
+    }
+    .feature-card h3 {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: #4A90E2;
+      font-family: 'Montserrat', sans-serif;
+      letter-spacing: 0.7px;
+    }
+    .feature-card p { 
+      text-align: center; 
+    }
+
+    .about-content {
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); 
+      gap: 4rem; 
+      margin-top: 3rem;
+    }
+    .about-text { 
+      font-size: 1.1rem; 
+      line-height: 1.8; 
+      opacity: 0.9; 
+      color: #ddd;
+    }
+    .about-text p { 
+      margin-bottom: 1.5rem; 
+    }
+    .stats-grid {
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 2rem; 
+      margin-top: 3rem;
+    }
+    .stat-card, .mission-card, .vision-card {
+      background: rgba(28,28,38,0.38);
+      border: 1.5px solid rgba(74,144,226,0.10);
+      backdrop-filter: blur(16px) saturate(160%);
+      box-shadow: 0 8px 32px rgba(74,144,226,0.06);
+      border-radius: 28px;
+      padding: 2.5rem;
+      transition: background 0.28s, border-color 0.28s, box-shadow 0.28s;
+      text-align: center; 
+      cursor: default; 
+      will-change: transform, box-shadow;
+    }
+    .stat-card:hover, .mission-card:hover, .vision-card:hover {
+      background: rgba(40,50,70,0.52); 
+      border-color: rgba(46,204,113,0.26); 
+      box-shadow: 0 15px 35px rgba(46,204,113,0.25);
+      transform: translateY(-8px);
+    }
+    .stat-number { 
+      font-size: 2.5rem; 
+      font-weight: 700; 
+      color: #4A90E2; 
+      display: block; 
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+    }
+    .stat-label { 
+      opacity: 0.8; 
+      margin-top: 0.5rem; 
+      font-weight: 600; 
+      letter-spacing: 0.8px; 
+      color: #ddd; 
+    }
+    .mission-vision {
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+      gap: 3rem; 
+      margin-top: 4rem;
+    }
+    .mission-card h3, .vision-card h3 { 
+      font-size: 1.5rem; 
+      margin-bottom: 1rem; 
+      color: #4A90E2;
+      font-family: 'Montserrat', sans-serif; 
+      letter-spacing: 0.7px; 
+    }
+
+    /* Media Page Styles */
+    .media-hero {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.3)),
+        url('Hyperloop.jpg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      margin: 0 -5vw 0 -5vw;
+      padding: 0 5vw;
+      padding-top: 80px;
+    }
+
+    .media-hero-content {
+      max-width: 800px;
+      z-index: 2;
+      animation: fadeInUp 1s ease-out;
+    }
+
+    .media-hero h1 {
+      font-size: 4.5rem;
+      font-weight: 300;
+      margin-bottom: 30px;
+      color: #fff;
+    }
+
+    .media-hero .highlight {
+      color: #2ECC71;
+      font-weight: 600;
+    }
+
+    .media-hero-subtitle {
+      font-size: 1.3rem;
+      margin-bottom: 50px;
+      opacity: 0.9;
+      font-weight: 300;
+    }
+
+    .brochure-access {
+      display: inline-flex;
+      align-items: center;
+      gap: 15px;
+      background: linear-gradient(45deg, #4A90E2, #2ECC71);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      border-radius: 42px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 10px 30px rgba(74, 144, 226, 0.3);
+    }
+
+    .brochure-access:hover {
+      transform: perspective(400px) rotateX(5deg) scale(1.045) translateY(-4px);
+      box-shadow: 0 18px 36px rgba(74,144,226,0.15);
+    }
+
+    .brochure-access::after {
+      content: "→";
+      font-size: 1.3rem;
+      transition: transform 0.3s ease;
+    }
+
+    .brochure-access:hover::after {
+      transform: translateX(5px);
+    }
+
+    .updates-section {
+      padding: 80px 0;
+    }
+
+    .timeline {
+      position: relative;
+      padding-left: 40px;
+      margin-top: 4rem;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 20px;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: linear-gradient(to bottom, #2ECC71, #4A90E2);
+    }
+
+    .update-item {
+      position: relative;
+      margin-bottom: 50px;
+      background: rgba(28,28,38,0.38);
+      border: 1.5px solid rgba(74,144,226,0.10);
+      backdrop-filter: blur(16px) saturate(160%);
+      box-shadow: 0 8px 32px rgba(74,144,226,0.06);
+      border-radius: 28px;
+      padding: 30px;
+      margin-left: 50px;
+      transition: all 0.3s ease;
+    }
+
+    .update-item:hover {
+      transform: translateX(10px) translateY(-5px);
+      background: rgba(40,50,70,0.52);
+      border-color: rgba(46,204,113,0.26);
+      box-shadow: 0 15px 40px rgba(46,204,113,0.22);
+    }
+
+    .update-item::before {
+      content: '';
+      position: absolute;
+      left: -62px;
+      top: 30px;
+      width: 20px;
+      height: 20px;
+      background: linear-gradient(45deg, #2ECC71, #4A90E2);
+      border-radius: 50%;
+      border: 4px solid #1a1a1a;
+      box-shadow: 0 0 15px rgba(46, 204, 113, 0.5);
+    }
+
+    .update-date {
+      color: #2ECC71;
+      font-size: 0.95rem;
+      margin-bottom: 15px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .update-title {
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+      font-weight: 600;
+      color: #4A90E2;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .update-content {
+      font-size: 1.05rem;
+      opacity: 0.9;
+      line-height: 1.7;
+      color: #ddd;
+    }
+
+    .update-tag {
+      display: inline-block;
+      background: linear-gradient(45deg, #4A90E2, #2ECC71);
+      color: white;
+      padding: 6px 15px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      margin-top: 15px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Loading animation */
+    @keyframes pageLoad {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity:0; transform:translateY(30px);} 
+      to { opacity:1; transform:translateY(0);} 
+    }
+
+    /* Cursor pulse animation */
+    @keyframes cursor-pulse {
+      0% { transform: translate(-50%,-50%) scale(1); }
+      50% { transform: translate(-50%,-50%) scale(1.5); box-shadow: 0 4px 20px 4px rgba(74,144,226,0.4); }
+      100% { transform: translate(-50%,-50%) scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav>
+    <div class="nav-container">
+      <div class="logo">
+        <img src="logo.png" alt="SRM Club Hyperloopin Logo" />
+      </div>
+      <ul class="nav-links">
+        <li><a href="javascript:void(0)" onclick="showPage('home')">Home</a></li>
+        <li><a href="javascript:void(0)" onclick="showPage('about')">About</a></li>
+        <li><a href="javascript:void(0)" onclick="showTeamPage()">Team</a></li>
+        <li><a href="javascript:void(0)" onclick="showPage('media')">Media</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero" id="home">
+    <div class="particles">
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+    </div>
+    <div class="hero-content">
+      <div class="hero-logo-bg">
+        <img class="hero-logo" id="hero-logo" alt="SRM Club Hyperloopin Logo" />
+      </div>
+      <!-- Recruitment Banner -->
+      <div class="recruitment-banner">
+        <span class="recruitment-text">🚀 RECRUITMENTS OPEN</span>
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLSdeLjkNHfOyKHqTRbNxaUZxfDvxRPNlht0TynnSKVPBaH2CIA/viewform?usp=dialog" target="_blank" class="recruitment-button">
+          Join Now
+        </a>
+      </div>
+
+      <h1>SRM Team Hyperloopin</h1>
+      <p class="hero-subtitle">Pioneering the Future of Transportation</p>
+      <p class="hero-description">
+        Developing ultra-fast, sustainable ground transportation technology that combines the speed of an airplane with the efficiency of a train. Join us in revolutionizing how the world moves.
+      </p>
+      <a href="javascript:void(0)" onclick="showPage('about')" class="cta-button">Explore Our Vision</a>
+    </div>
+  </section>
+
+  <!-- Video Section -->
+  <section class="video-section" id="videoSection">
+    <div class="video-container">
+      <h2>Experience the Future</h2>
+      <p class="subtitle">Watch our hyperloop technology in action</p>
+      <div class="video-wrapper">
+        <video autoplay muted loop playsinline>
+          <source src="final_hyperloopin.mp4" type="video/mp4">
+          <source src="final_hyperloopin.mov" type="video/quicktime">
+          Your browser does not support the video tag.
+        </video>
+      </div>
+    </div>
+  </section>
+
+  <!-- Home Page Features Section -->
+  <section class="page-section active" id="homePage">
+    <h2>Why Hyperloop?</h2>
+    <p class="subtitle">The next generation of transportation technology</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>Ultra-High Speed</h3>
+        <p>Travel at speeds up to 700+ mph in a low-pressure tube environment, reducing travel times between cities to mere minutes.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌱</div>
+        <h3>Sustainable</h3>
+        <p>Fully electric operations with minimal environmental impact, aiming for climate-neutral transportation over the system's lifecycle.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🚀</div>
+        <h3>Innovation</h3>
+        <p>Cutting-edge magnetic levitation and propulsion systems ensure smooth, silent, and comfortable passenger experience.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Page -->
+  <section class="page-section" id="aboutPage">
+    <h2>ABOUT US</h2>
+    <p class="subtitle">Driving innovation in ultra-high-speed transportation</p>
+    <div class="about-content">
+      <div class="about-text">
+        <p>SRM Club Hyperloopin is a student-led research and development initiative focused on advancing hyperloop technology. We are committed to developing the next generation of ultra-fast, sustainable transportation systems that will revolutionize how people and cargo move across the globe.</p>
+        <p>Our team consists of passionate engineering students of SRMIST from various disciplines working together to tackle the complex challenges of hyperloop technology. From aerodynamics and propulsion to magnetic levitation, from vacuum systems to developing software drives and systems, we explore every aspect of this revolutionary transportation concept.</p>
+        <p>Through hands-on research, prototype development, and collaboration with industry partners, we aim to contribute meaningfully to the future of transportation while providing our members with invaluable experience in cutting-edge engineering.</p>
+      </div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-number" id="members-count">0</span>
+        <div class="stat-label">Active Members</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number">1</span>
+        <div class="stat-label">Research Projects</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number">6 months</span>
+        <div class="stat-label">Active Time</div>
+      </div>
+    </div>
+    <div class="mission-vision">
+      <div class="mission-card">
+        <h3>🎯 Our Mission</h3>
+        <p>To advance hyperloop technology through innovative research, collaborative development, and hands-on experimentation, while fostering the next generation of transportation engineers and contributing to sustainable mobility solutions.</p>
+      </div>
+      <div class="vision-card">
+        <h3>🔮 Our Vision</h3>
+        <p>To be recognized as a leading student organization in hyperloop research, contributing breakthrough innovations that help make ultra-high-speed ground transportation a reality for sustainable global mobility.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Media Page -->
+  <section class="page-section" id="mediaPage">
+    <div class="media-hero">
+      <div class="media-hero-content">
+        <h1>Introducing <span class="highlight">Hyperloop</span></h1>
+        <p class="media-hero-subtitle">Define high-speed transportation innovation management</p>
+        <a href="#" class="brochure-access" onclick="openBrochure()">Go to Brochure</a>
+      </div>
+    </div>
+
+    <div class="updates-section">
+      <h2>Latest Updates</h2>
+      <p class="subtitle">Stay informed about our progress and achievements</p>
+      <div class="timeline">
+        <div class="update-item">
+          <div class="update-date">Present</div>
+          <h3 class="update-title">Club Recruitment</h3>
+          <p class="update-content">Ongoing recruitment drive to bring in passionate and skilled members to contribute to the design, development, and innovation of our Hyperloop project.</p>
+          <span class="update-tag">Recruitment</span>
+        </div>
+                     
+        <div class="update-item">
+          <div class="update-date">February - Present</div>
+          <h3 class="update-title">Prototype Pod Development</h3>
+          <p class="update-content">Currently developing our first prototype model to showcase the design and functionality of our Hyperloop concept. The build is progressing well with key components taking shape.</p>
+          <span class="update-tag">Development</span>
+        </div>
+        
+        <div class="update-item">
+          <div class="update-date">January 2025</div>
+          <h3 class="update-title">Club Inaugration</h3>
+          <p class="update-content">Officially launched the Hyperloopin club.</p>
+          <span class="update-tag">Inauguration</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Team Page - Fullscreen Overlay -->
+  <section id="teamPage">
+    <!-- Close button -->
+    <div class="team-close-btn" onclick="closeTeamPage()">×</div>
+    
+    <!-- Intro Screen -->
+    <section class="team-intro-screen">
+      <h1 class="team-main-title">TEAM</h1>
+      <h2 class="team-sub-title">AARAMBH HYPERLOOP</h2>
+      <div class="team-scroll-indicator">A NEW ERA OF CONNECTIVITY!</div>
+    </section>
+
+    <!-- Main Team Section -->
+    <section class="team-main-section">
+      <div class="team-container">
+        <h2 class="team-section-heading">OUR TEAM</h2>
+        
+        <div class="team-category">
+          <h3>President & Vice President</h3>
+          <div class="card-grid">
+            <div class="member-card">
+              <img src="pres.jpg" alt="President" />
+              <h4>Hruday Divakarn</h4>
+              <p>President</p>
+            </div>
+            <div class="member-card">
+              <img src="vp.jpg" alt="Vice President" />
+              <h4>Dennis Abraham</h4>
+              <p>Vice President</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="team-category">
+          <h3>Core Team Members</h3>
+          <div class="card-grid">
+            <div class="member-card">
+              <img src="amish.jpg" alt="Amish Roopesh" />
+              <h4>Amish Roopesh</h4>
+              <p>Structural Team Lead</p>
+            </div>
+            <div class="member-card">
+              <img src="alen.jpg" alt="Allen Mathews" />
+              <h4>Allen Mathews</h4>
+              <p>Structural Team Associate Lead</p>
+            </div>
+            <div class="member-card">
+              <img src="sidd.jpg" alt="Sidhanth" />
+              <h4>Sidhanth</h4>
+              <p>Structural Associate Team</p>
+            </div>
+            <div class="member-card">
+              <img src="mhesh.jpg" alt="Mahesh" />
+              <h4>Mahesh</h4>
+              <p>Embedded System Team Lead</p>
+            </div>
+            <div class="member-card">
+              <img src="nshf.jpg" alt="Nashif" />
+              <h4>Nashif</h4>
+              <p>Embedded System Team Associate Lead</p>
+            </div>
+            <div class="member-card">
+              <img src="alf.JPG" alt="Alfin Tony" />
+              <h4>Alfin Tony</h4>
+              <p>Software Configurations Team Lead</p>
+            </div>
+            <div class="member-card">
+              <img src="teelu.jpg" alt="Swayambu" />
+              <h4>Swayambu</h4>
+              <p>Corporate Team Lead</p>
+            </div>
+            <div class="member-card">
+              <img src="jswn.jpg" alt="Jesvin" />
+              <h4>Jesvin</h4>
+              <p>Corporate Team Associate Lead</p>
+            </div>
+            <div class="member-card">
+              <img src="braj.jpg" alt="Bharathraj S" />
+              <h4>Bharathraj S</h4>
+              <p>Propulsion and Braking Team Lead</p>
+            </div>
+            <div class="member-card">
+              <img src="no.png" alt="Saswata" />
+              <h4>Saswata</h4>
+              <p>Software Configurations Associate Team Lead</p>
+            </div>
+            <div class="member-card">
+              <img src="no.png" alt="Kushagra" />
+              <h4>Kushagra</h4>
+              <p>Corporate Team Associate Lead</p>
+            </div>
+            <div class="member-card">
+              <img src="no.png" alt="B Varun Karthik" />
+              <h4>B Varun Karthik</h4>
+              <p>Corporate Team Associate Lead</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <script type="module" src="/src/main.tsx"></script>
+  <script>
+    // Logo fallback for nav and hero
+    window.addEventListener('DOMContentLoaded', function () {
+      const navLogo = document.querySelector('.logo img');
+      if (navLogo) {
+        navLogo.src = 'logo.png';
+        navLogo.alt = 'SRM Club Hyperloopin Logo';
+        navLogo.onerror = function () {
+          navLogo.style.display = 'none';
+          navLogo.parentElement.innerHTML = '<span class="logo-text">HYPERLOOPIN</span>';
+        };
+      }
+
+      const heroLogo = document.getElementById('hero-logo');
+      if (heroLogo) {
+        heroLogo.src = 'logo.png';
+        heroLogo.alt = 'SRM Club Hyperloopin Logo';
+        heroLogo.onerror = function () {
+          heroLogo.style.display = 'none';
+          const fallback = document.createElement('div');
+          fallback.style.cssText = `
+            width: 100px; height: 100px; margin: 0 auto 2rem auto;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(74,144,226,0.2); border-radius: 50%;
+            font-size: 1.2rem; font-weight: bold; color: #4A90E2;
+            animation: logoFloat 4s ease-in-out infinite;
+          `;
+          fallback.textContent = 'HL';
+          heroLogo.parentNode.insertBefore(fallback, heroLogo);
+        };
+      }
+    });
+
+    function showPage(pageId) {
+      document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+      if (pageId === 'home') {
+        document.getElementById('homePage').classList.add('active');
+        document.getElementById('home').style.display = 'flex';
+        document.getElementById('videoSection').style.display = 'flex';
+        document.getElementById('home').classList.remove('morphed');
+        document.getElementById('homePage').classList.remove('morphed');
+        document.getElementById('videoSection').classList.remove('morphed');
+      } else if (pageId === 'about') {
+        document.getElementById('aboutPage').classList.add('active');
+        document.getElementById('home').style.display = 'none';
+        document.getElementById('videoSection').style.display = 'none';
+      } else if (pageId === 'media') {
+        document.getElementById('mediaPage').classList.add('active');
+        document.getElementById('home').style.display = 'none';
+        document.getElementById('videoSection').style.display = 'none';
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showTeamPage() {
+      const teamPage = document.getElementById('teamPage');
+      teamPage.classList.add('active');
+      initializeTeamPage();
+    }
+
+    function closeTeamPage() {
+      const teamPage = document.getElementById('teamPage');
+      teamPage.classList.remove('active');
+      // Reset team page state
+      if (window.teamPageState) {
+        window.teamPageState.isUnlocked = false;
+        window.teamPageState.currentY = 0;
+        const intro = document.querySelector('.team-intro-screen');
+        const team = document.querySelector('.team-main-section');
+        intro.style.transform = 'translateY(0px)';
+        intro.style.opacity = '1';
+        intro.style.pointerEvents = 'auto';
+        team.style.opacity = '0';
+        team.style.pointerEvents = 'none';
+      }
+    }
+
+    function openBrochure() {
+      // Replace with your actual Google Drive file ID
+      window.open('https://drive.google.com/file/d/YOUR_GOOGLE_DRIVE_FILE_ID/view?usp=sharing', '_blank');
+    }
+
+    // Nav hide on scroll & morphing
+    let lastScroll = 0;
+    const nav = document.querySelector('nav');
+    window.addEventListener('scroll', function () {
+      const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+      if (currentScroll > lastScroll && currentScroll > 80) nav.classList.add('hide');
+      else nav.classList.remove('hide');
+      lastScroll = currentScroll <= 0 ? 0 : currentScroll;
+      requestTick();
+    });
+
+    let ticking = false;
+    function handleScrollMorph() {
+      const hero = document.getElementById('home');
+      const videoSection = document.getElementById('videoSection');
+      const homePage = document.getElementById('homePage');
+      const scrollY = window.scrollY;
+      
+      const heroTrigger = 300;
+      const videoTrigger = window.innerHeight * 0.8;
+      const featuresTrigger = window.innerHeight * 1.6;
+
+      if (homePage && homePage.classList.contains('active')) {
+        if (scrollY > heroTrigger) {
+          hero.classList.add('morphed');
+        } else {
+          hero.classList.remove('morphed');
+        }
+
+        if (scrollY > videoTrigger) {
+          videoSection.classList.add('scroll-morphed');
+        } else {
+          videoSection.classList.remove('scroll-morphed');
+        }
+
+        if (scrollY > featuresTrigger) {
+          homePage.classList.add('scroll-morphed');
+        } else {
+          homePage.classList.remove('scroll-morphed');
+        }
+      }
+      ticking = false;
+    }
+
+    function requestTick() {
+      if (!ticking) {
+        requestAnimationFrame(handleScrollMorph);
+        ticking = true;
+      }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(anchor.getAttribute('href'));
+        if (target) target.scrollIntoView({ behavior: "smooth" });
+      });
+    });
+
+    // Intersection observer for fade-in
+    const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -100px 0px' };
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) entry.target.style.animation = 'fadeInUp 0.8s ease-out forwards';
+      });
+    }, observerOptions);
+    
+    document.querySelectorAll('.feature-card, .stat-card, .mission-card, .vision-card, .update-item').forEach(card => observer.observe(card));
+
+    // Count up animation
+    function animateCountUp(el, end, suffix, duration = 3500) {
+      let start = 0;
+      const timeStep = 16;
+      const steps = Math.ceil(duration / timeStep);
+      const increment = end / steps;
+      let current = start;
+      function step() {
+        current += increment;
+        if (current >= end) {
+          el.textContent = end + suffix;
+        } else {
+          el.textContent = Math.floor(current) + suffix;
+          requestAnimationFrame(step);
+        }
+      }
+      step();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const membersCountEl = document.getElementById('members-count');
+      if (!membersCountEl) return;
+      let hasAnimated = false;
+      function onStatVisible(entries) {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && !hasAnimated) {
+            animateCountUp(membersCountEl, 35, '+');
+            hasAnimated = true;
+          }
+        });
+      }
+      const observer = new IntersectionObserver(onStatVisible, { threshold: 0.5 });
+      observer.observe(membersCountEl);
+    });
+
+    // Team Page Interactive Functionality
+    function initializeTeamPage() {
+      const intro = document.querySelector('.team-intro-screen');
+      const team = document.querySelector('.team-main-section');
+      const mainTitle = document.querySelector('.team-main-title');
+      const scrollIndicator = document.querySelector('.team-scroll-indicator');
+      
+      let startY = null;
+      let currentY = 0;
+      const maxTranslate = -window.innerHeight;
+      const resistanceFactor = 0.3;
+      let isDragging = false;
+      let isUnlocked = false;
+
+      // Store state globally so we can reset it when closing
+      window.teamPageState = { isUnlocked, currentY };
+
+      const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
+
+      function addDragFeedback() {
+        const progress = Math.abs(currentY) / Math.abs(maxTranslate);
+        const scale = 1 - progress * 0.1;
+        const rotation = progress * 5;
+        mainTitle.style.transform = `scale(${scale}) rotate(${rotation}deg)`;
+        const indicatorOpacity = 0.6 - progress * 0.4;
+        const indicatorY = progress * 20;
+        scrollIndicator.style.opacity = indicatorOpacity;
+        scrollIndicator.style.transform = `translateY(${indicatorY}px)`;
+        const blur = progress * 15;
+        intro.style.filter = `blur(${blur}px)`;
+      }
+
+      function resetDragFeedback() {
+        mainTitle.style.transform = '';
+        scrollIndicator.style.opacity = '';
+        scrollIndicator.style.transform = '';
+        intro.style.filter = '';
+      }
+
+      function showTeamSection() {
+        team.style.opacity = 1;
+        team.style.pointerEvents = "auto";
+        team.scrollTop = 0;
+        intro.style.pointerEvents = "none";
+        team.setAttribute('tabindex', '-1');
+        team.focus();
+        setTimeout(() => {
+          team.removeAttribute('tabindex');
+        }, 100);
+        animateTeamCards();
+      }
+
+      function updateUI() {
+        intro.style.transform = `translateY(${currentY}px)`;
+        intro.style.opacity = Math.max(0, 1 + currentY / window.innerHeight);
+        if (isDragging) {
+          addDragFeedback();
+        }
+        if (currentY <= maxTranslate + 5) {
+          showTeamSection();
+        } else {
+          team.style.opacity = 0;
+          team.style.pointerEvents = "none";
+          intro.style.pointerEvents = "auto";
+        }
+      }
+
+      function animateTeamCards() {
+        const cards = document.querySelectorAll('.member-card');
+        cards.forEach((card, index) => {
+          card.style.setProperty('--card-index', index);
+          card.style.animationDelay = `${index * 0.1}s`;
+          card.classList.add('fade-enter-active');
+        });
+      }
+
+      function unlockSequence() {
+        currentY = maxTranslate;
+        isUnlocked = true;
+        window.teamPageState.isUnlocked = true;
+        window.teamPageState.currentY = currentY;
+        intro.style.transition = 'transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.6s ease, filter 0.5s ease';
+        updateUI();
+        document.body.style.filter = 'brightness(1.2)';
+        setTimeout(() => {
+          document.body.style.filter = '';
+        }, 150);
+        resetDragFeedback();
+        setTimeout(() => {
+          intro.style.transition = '';
+        }, 800);
+      }
+
+      function lockSequence() {
+        isUnlocked = false;
+        window.teamPageState.isUnlocked = false;
+        intro.style.transition = 'transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.6s ease, filter 0.5s ease';
+        currentY = 0;
+        window.teamPageState.currentY = currentY;
+        updateUI();
+        resetDragFeedback();
+        mainTitle.style.animation = 'none';
+        setTimeout(() => {
+          mainTitle.style.animation = '';
+        }, 50);
+        setTimeout(() => {
+          intro.style.transition = '';
+        }, 800);
+      }
+
+      function onDragStart(e) {
+        if (isUnlocked) return;
+        isDragging = true;
+        intro.classList.add('dragging');
+        startY = e.touches ? e.touches[0].clientY : e.clientY;
+        intro.style.transform += ' scale(0.98)';
+      }
+
+      function onDragMove(e) {
+        if (!isDragging || isUnlocked) return;
+        e.preventDefault();
+        const y = e.touches ? e.touches[0].clientY : e.clientY;
+        const delta = y - startY;
+        startY = y;
+        let nextY = currentY + delta * resistanceFactor;
+        if (nextY > 0) nextY *= 0.3;
+        if (nextY < maxTranslate) nextY = maxTranslate + (nextY - maxTranslate) * 0.3;
+        currentY = clamp(nextY, maxTranslate - 100, 100);
+        updateUI();
+      }
+
+      function onDragEnd() {
+        if (isUnlocked) return;
+        isDragging = false;
+        intro.classList.remove('dragging');
+        intro.style.transform = intro.style.transform.replace(' scale(0.98)', '');
+        if (currentY < maxTranslate / 2) {
+          unlockSequence();
+        } else {
+          currentY = 0;
+          intro.style.transition = 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease, filter 0.4s ease';
+          updateUI();
+          resetDragFeedback();
+          setTimeout(() => {
+            intro.style.transition = '';
+          }, 600);
+        }
+      }
+
+      // Touch & Mouse Events for intro screen
+      intro.addEventListener('touchstart', onDragStart, { passive: false });
+      intro.addEventListener('touchmove', onDragMove, { passive: false });
+      intro.addEventListener('touchend', onDragEnd);
+      intro.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        onDragStart(e);
+      });
+      document.addEventListener('mousemove', (e) => {
+        if (!isUnlocked) onDragMove(e);
+      });
+      document.addEventListener('mouseup', (e) => {
+        if (!isUnlocked) onDragEnd(e);
+      });
+
+      // Wheel handling
+      let wheelTimeout;
+      let wheelVelocity = 0;
+
+      intro.addEventListener('wheel', (e) => {
+        if (isUnlocked) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const delta = e.deltaY;
+        wheelVelocity += delta * 0.5;
+        wheelVelocity = clamp(wheelVelocity, -50, 50);
+        let nextY = currentY - wheelVelocity;
+        currentY = clamp(nextY, maxTranslate - 100, 100);
+        updateUI();
+        clearTimeout(wheelTimeout);
+        wheelTimeout = setTimeout(() => {
+          wheelVelocity *= 0.8;
+          if (Math.abs(wheelVelocity) < 1) {
+            wheelVelocity = 0;
+            if (currentY < maxTranslate / 2) {
+              unlockSequence();
+            } else {
+              currentY = 0;
+              intro.style.transition = 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease, filter 0.4s ease';
+              updateUI();
+              resetDragFeedback();
+              setTimeout(() => {
+                intro.style.transition = '';
+              }, 600);
+            }
+          }
+        }, 50);
+      }, { passive: false });
+
+      // Team section wheel handling for going back
+      let teamWheelHandler = (e) => {
+        if (!isUnlocked) return;
+        const isAtTop = team.scrollTop <= 10;
+        const isScrollingUp = e.deltaY < 0;
+        if (isAtTop && isScrollingUp) {
+          e.preventDefault();
+          e.stopPropagation();
+          team.style.transform = 'scale(1.02)';
+          team.style.filter = 'brightness(1.1)';
+          setTimeout(() => {
+            team.style.transform = '';
+            team.style.filter = '';
+            lockSequence();
+          }, 100);
+        }
+      };
+
+      team.addEventListener('wheel', teamWheelHandler, { passive: false });
+
+      // Enhanced touch handling for team section
+      let teamTouchStartY = null;
+      let teamTouchStartTime = null;
+
+      team.addEventListener('touchstart', (e) => {
+        if (!isUnlocked) return;
+        teamTouchStartY = e.touches[0].clientY;
+        teamTouchStartTime = Date.now();
+      }, { passive: true });
+
+      team.addEventListener('touchmove', (e) => {
+        if (!isUnlocked || team.scrollTop > 5) return;
+        const currentTouchY = e.touches[0].clientY;
+        const deltaY = currentTouchY - teamTouchStartY;
+        const deltaTime = Date.now() - teamTouchStartTime;
+        if (deltaY > 30) {
+          team.style.transform = `translateY(${Math.min(deltaY * 0.2, 20)}px)`;
+          team.style.filter = `brightness(${1 + deltaY * 0.002})`;
+        }
+        if (deltaY > 100 && deltaTime < 800) {
+          e.preventDefault();
+          team.style.transform = '';
+          team.style.filter = '';
+          lockSequence();
+        }
+      }, { passive: false });
+
+      team.addEventListener('touchend', () => {
+        team.style.transition = 'transform 0.3s ease, filter 0.3s ease';
+        team.style.transform = '';
+        team.style.filter = '';
+        setTimeout(() => {
+          team.style.transition = '';
+        }, 300);
+      });
+
+      // Initialize
+      updateUI();
+
+      // Add intro animation on page load
+      setTimeout(() => {
+        mainTitle.style.animation = 'titlePulse 2s ease-in-out infinite';
+      }, 500);
+    }
+
+    // Enhanced cursor and particle system
+    document.addEventListener('DOMContentLoaded', function () {
+      // Particle canvas
+      const particleCanvas = document.createElement('canvas');
+      particleCanvas.style.position = 'fixed';
+      particleCanvas.style.pointerEvents = 'none';
+      particleCanvas.style.left = 0;
+      particleCanvas.style.top = 0;
+      particleCanvas.style.width = '100vw';
+      particleCanvas.style.height = '100vh';
+      particleCanvas.style.zIndex = 9999;
+      particleCanvas.width = window.innerWidth;
+      particleCanvas.height = window.innerHeight;
+      document.body.appendChild(particleCanvas);
+
+      const ctx = particleCanvas.getContext('2d');
+      let mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+      let particles = [];
+
+      function resizeCanvas() {
+        particleCanvas.width = window.innerWidth;
+        particleCanvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resizeCanvas);
+
+      function randomBetween(a, b) {
+        return a + (b - a) * Math.random();
+      }
+
+      function Particle(x, y) {
+        this.x = x;
+        this.y = y;
+        this.radius = randomBetween(2, 5);
+        this.alpha = 1;
+        this.dx = randomBetween(-1, 1);
+        this.dy = randomBetween(-1, 1);
+        const colors = [
+          'rgba(74,144,226,0.9)',
+          'rgba(46,204,113,0.85)'
+        ];
+        this.color = colors[Math.floor(Math.random() * colors.length)];
+      }
+
+      Particle.prototype.draw = function () {
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.shadowColor = this.color;
+        ctx.shadowBlur = 8;
+        ctx.fill();
+        ctx.restore();
+      };
+
+      Particle.prototype.update = function () {
+        this.x += this.dx;
+        this.y += this.dy;
+        this.radius *= 0.96;
+        this.alpha -= 0.025;
+      };
+
+      function animate() {
+        ctx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+        particles = particles.filter(p => p.alpha > 0 && p.radius > 0.5);
+        for (const p of particles) {
+          p.update();
+          p.draw();
+        }
+        requestAnimationFrame(animate);
+      }
+      animate();
+
+      document.addEventListener('mousemove', e => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+        for (let i = 0; i < 3; i++) {
+          particles.push(new Particle(mouse.x, mouse.y));
+        }
+      });
+
+      // Custom cursor dot
+      const dot = document.createElement('div');
+      dot.style.width = dot.style.height = '16px';
+      dot.style.borderRadius = '50%';
+      dot.style.position = 'fixed';
+      dot.style.pointerEvents = 'none';
+      dot.style.background = 'linear-gradient(135deg,#2ECC71 60%,#4A90E2 100%)';
+      dot.style.boxShadow = '0 2px 10px 2px rgba(74,144,226,0.22)';
+      dot.style.transform = 'translate(-50%,-50%)';
+      dot.style.zIndex = 10000;
+      document.body.appendChild(dot);
+
+      document.addEventListener('mousemove', function(e) {
+        dot.style.left = e.clientX + 'px';
+        dot.style.top = e.clientY + 'px';
+      });
+
+      // Pulsating effect for interactable elements
+      let pulseActive = false;
+      function isInteractable(el) {
+        while (el) {
+          if (el.tagName === 'A' || el.tagName === 'BUTTON' || (el.classList && (
+            el.classList.contains('cta-button') ||
+            el.classList.contains('feature-card') ||
+            el.classList.contains('stat-card') ||
+            el.classList.contains('mission-card') ||
+            el.classList.contains('vision-card') ||
+            el.classList.contains('member-card') ||
+            el.classList.contains('team-scroll-indicator') ||
+            el.classList.contains('team-close-btn')
+          ))) return true;
+          el = el.parentElement;
+        }
+        return false;
+      }
+
+      document.addEventListener('mousemove', function(e) {
+        if (isInteractable(e.target)) {
+          if (!pulseActive) {
+            pulseActive = true;
+            dot.style.animation = 'cursor-pulse 0.38s ease-in-out';
+            setTimeout(() => {
+              dot.style.animation = '';
+              pulseActive = false;
+            }, 380);
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>
